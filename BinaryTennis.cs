@@ -5,7 +5,7 @@ namespace ConsoleApplication10
 
     // to think about realization (arduino , android, microphone, infrared sensor etc etc etc)
     // to make ui 
-   // to add an opportunity to set start parameters;
+    
     class Program
     {
         static void Main()
@@ -23,91 +23,11 @@ namespace ConsoleApplication10
             {
                 Console.WriteLine("Invalid Game Parameters.");
             }
-
-
-            
             Console.ReadLine();
-        }
-    }
-
-
-    public class GameParameters
-    {
-        public enum FinishScore
-        { Score21 = 0, Score11 };
-        public enum ServesForOnePlayer
-        { Serves2, Serves5 };
-
-        public FinishScore FinishScoreValue;
-        
-        public ServesForOnePlayer ServesForOnePlayerValue;
-
-        public GameParameters()
-        {
-            this.FinishScoreValue = FinishScore.Score21;
-            this.ServesForOnePlayerValue = ServesForOnePlayer.Serves5;
-        }
-
-        public GameParameters(FinishScore arg, ServesForOnePlayer arg2)
-        {
-            this.FinishScoreValue = arg;
-            this.ServesForOnePlayerValue = arg2;
-        }
-        public GameParameters(int FinishScore, int ServesForOnePlayer)
-        {
-            switch (FinishScore)
-            {
-                case 11:
-                    this.FinishScoreValue = GameParameters.FinishScore.Score11;
-                    break;
-                case 21:
-                    this.FinishScoreValue = GameParameters.FinishScore.Score21;
-                    break;
-                default:
-                    throw new InvalidOperationException();
-            }
-
-            switch (ServesForOnePlayer)
-            {
-                case 2:
-                    this.ServesForOnePlayerValue = GameParameters.ServesForOnePlayer.Serves2;
-                    break;
-                case 5:
-                    this.ServesForOnePlayerValue = GameParameters.ServesForOnePlayer.Serves5;
-                    break;
-                default:
-                    throw new InvalidOperationException();
-            }
-        }
-        public Dictionary<String, int> GetDictionaryResult() // FinishScore, ServesForOnePlayer
-        {
-            Dictionary<String, int> result = new Dictionary<String, int>();
-            switch (this.FinishScoreValue)
-            {
-                case FinishScore.Score11:
-                    result.Add("FinishScore", 11);
-                    break;
-                case FinishScore.Score21:
-                    result.Add("FinishScore", 21);
-                    break;
-            }
-            switch (this.ServesForOnePlayerValue)
-            {
-                case ServesForOnePlayer.Serves2:
-                    result.Add("ServesForOnePlayer", 2);
-                    break;
-                case ServesForOnePlayer.Serves5:
-                    result.Add("ServesForOnePlayer", 5);
-                    break;
-            }
-
-            return result;
-           
         }
     }
     public class BinaryTennis
     {
-
         // plyaer zero table hit == zero == false;
         // player one table hit == one = true;
         public BinaryTennis(GameParameters @params)
@@ -208,48 +128,5 @@ namespace ConsoleApplication10
             Console.WriteLine(String.Format("Player 0 : {0} \t Player 1 : {1}", PlayerZeroScore, PlayerOneScore));
         }
 
-    }
-
-    public class Serve
-    {
-        public List<bool> ServeLog = new List<bool>();
-        public bool Winner {private set; get; } // private set 
-        
-        public Serve GetRandomServe(Random rnd) // test tool
-        {
-            List<bool> tmp = new List<bool>();
-
-            for (int i = 0; i < rnd.Next(2, 15); i++)
-            {
-                tmp.Add(rnd.NextDouble() >= 0.5);
-            }
-                // Range 1: [0.0 ... 0.5]
-                //Range 2: [0.5 ... 1.0]
-                //|Range 1| = |Range 2|
-                return new Serve() { ServeLog = tmp, Winner = GetWinnerOfServe(tmp) };
-        }
-
-        private static bool GetWinnerOfServe(List<bool> servelog) // test tool
-        {
-            return servelog[servelog.Count - 1 - 1]; // servelog.Count - 1 - 1 == winner 
-        }
-        
-        public void PrintResults() // test tool
-        {
-            int zero = 0;
-            int one = 0;
-            foreach (var el in ServeLog)
-            {
-                Console.WriteLine(el);
-                if (el.Equals(true))
-                {
-                    one++;
-                }
-                else zero++;
-            }
-            Console.WriteLine(String.Format("0false:{0}\t1true:{1}", zero, one));
-        }
-
- 
     }
 }
