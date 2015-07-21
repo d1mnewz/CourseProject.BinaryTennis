@@ -2,24 +2,107 @@
 using System.Collections.Generic;
 namespace ConsoleApplication10
 {
-    
 
-
-    // to think about realization (arduino , android, microphone etc etc etc)
-    // to handle 20 21 situation 
+    // to think about realization (arduino , android, microphone, infrared sensor etc etc etc)
     // to make ui 
+   // to add an opportunity to set start parameters;
     class Program
     {
         static void Main()
         {
-            
-            BinaryTennis obj = new BinaryTennis();
-            obj.PlayRandomGame();
-            
-            obj.PrintResultOfGame();
+
+            try
+            {
+
+                BinaryTennis obj = new BinaryTennis(new GameParameters(11, 2));
+                obj.PlayRandomGame();
+
+                obj.PrintResultOfGame();
+            }
+            catch (InvalidOperationException)
+            {
+                Console.WriteLine("Invalid Game Parameters.");
+            }
+
 
             
             Console.ReadLine();
+        }
+    }
+
+
+    public class GameParameters
+    {
+        public enum FinishScore
+        { Score21 = 0, Score11 };
+        public enum ServesForOnePlayer
+        { Serves2, Serves5 };
+
+        public FinishScore FinishScoreValue;
+        
+        public ServesForOnePlayer ServesForOnePlayerValue;
+
+        public GameParameters()
+        {
+            this.FinishScoreValue = FinishScore.Score21;
+            this.ServesForOnePlayerValue = ServesForOnePlayer.Serves5;
+        }
+
+        public GameParameters(FinishScore arg, ServesForOnePlayer arg2)
+        {
+            this.FinishScoreValue = arg;
+            this.ServesForOnePlayerValue = arg2;
+        }
+        public GameParameters(int FinishScore, int ServesForOnePlayer)
+        {
+            switch (FinishScore)
+            {
+                case 11:
+                    this.FinishScoreValue = GameParameters.FinishScore.Score11;
+                    break;
+                case 21:
+                    this.FinishScoreValue = GameParameters.FinishScore.Score21;
+                    break;
+                default:
+                    throw new InvalidOperationException();
+            }
+
+            switch (ServesForOnePlayer)
+            {
+                case 2:
+                    this.ServesForOnePlayerValue = GameParameters.ServesForOnePlayer.Serves2;
+                    break;
+                case 5:
+                    this.ServesForOnePlayerValue = GameParameters.ServesForOnePlayer.Serves5;
+                    break;
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
+        public Dictionary<String, int> GetDictionaryResult() // FinishScore, ServesForOnePlayer
+        {
+            Dictionary<String, int> result = new Dictionary<String, int>();
+            switch (this.FinishScoreValue)
+            {
+                case FinishScore.Score11:
+                    result.Add("FinishScore", 11);
+                    break;
+                case FinishScore.Score21:
+                    result.Add("FinishScore", 21);
+                    break;
+            }
+            switch (this.ServesForOnePlayerValue)
+            {
+                case ServesForOnePlayer.Serves2:
+                    result.Add("ServesForOnePlayer", 2);
+                    break;
+                case ServesForOnePlayer.Serves5:
+                    result.Add("ServesForOnePlayer", 5);
+                    break;
+            }
+
+            return result;
+           
         }
     }
     public class BinaryTennis
@@ -27,13 +110,15 @@ namespace ConsoleApplication10
 
         // plyaer zero table hit == zero == false;
         // player one table hit == one = true;
-        public BinaryTennis()
+        public BinaryTennis(GameParameters @params)
         {
             rnd = new Random();
             this.CriticalScore = false;
             this.PlayerOneScore = 0;
             this.PlayerZeroScore = 0;
+            this.@params = @params.GetDictionaryResult();
         }
+        public Dictionary<String, int> @params;
         Random rnd;
         public List<Serve> results = new List<Serve>();
         public int PlayerOneScore;
@@ -59,7 +144,7 @@ namespace ConsoleApplication10
         }
         public void CriticalScoreHandle()
         {
-            CriticalScores PlayerZeroResult = 0;
+            CriticalScores PlayerZeroResult = 0; // start from equal
             
             Serve tmpServe;
             for (int i = 0; ; i++)
@@ -85,21 +170,22 @@ namespace ConsoleApplication10
         }
         public void PlayRandomGame()
         {
-            for (int i = 0; PlayerOneScore != 21 && PlayerZeroScore != 21; i++)
+            for (int i = 0; PlayerOneScore != this.@params["FinishScore"] && PlayerZeroScore != this.@params["FinishScore"]; i++)
             {
                 if (this.CriticalScore == true)
                 {
                     CriticalScoreHandle();
-                    break;
+                    break; 
                 }
                 AddServe(new Serve().GetRandomServe(rnd));
-                if (this.PlayerOneScore.Equals(20) && this.PlayerZeroScore.Equals(20))
+                if (this.PlayerOneScore.Equals(this.@params["FinishScore"] - 1) && this.PlayerZeroScore.Equals(this.@params["FinishScore"] - 1))
                 {
                     this.CriticalScore = true;
                 }
             }
 
             // test part for criticalScore ; it generates 20: 20 score
+            // to make this possible make Serve.winner set as non private
             // 
             //for (int i = 0; PlayerOneScore != 21 && PlayerZeroScore != 21; i++)
             //{
@@ -127,7 +213,7 @@ namespace ConsoleApplication10
     public class Serve
     {
         public List<bool> ServeLog = new List<bool>();
-        public bool Winner {set; get; }
+        public bool Winner {private set; get; } // private set 
         
         public Serve GetRandomServe(Random rnd) // test tool
         {
